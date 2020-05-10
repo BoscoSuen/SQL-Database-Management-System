@@ -11,21 +11,33 @@
 
 #include <stdio.h>
 #include "CommandProcessor.hpp"
-
+#include "Database.hpp"
+#include "FolderReader.hpp"
 #include "Storage.hpp"
+#include "View.hpp"
 #include <filesystem>
 
 namespace ECE141 {
 
-    class DBCmdProcessor : public CommandProcessor {
+    class DBProcessor : public CommandProcessor {
     public:
 
-        DBCmdProcessor(CommandProcessor *aNext=nullptr);
-        virtual ~DBCmdProcessor();
+        DBProcessor(CommandProcessor *aNext=nullptr);
+        virtual ~DBProcessor();
 
         virtual Statement*    getStatement(Tokenizer &aTokenizer);
         virtual StatusResult  interpret(const Statement &aStatement);
 
+        StatusResult createDatabase(const std::string &aName);
+        StatusResult dropDatabase (const std::string &aName);
+        StatusResult useDatabase (const std::string &aName);
+        StatusResult describeDatabase (const std::string &aName);
+        StatusResult showDatabases () const;
+
+    protected:
+        Database *activeDB;
+        Database* loadDatabase(const std::string &aName) const;
+        DBProcessor& releaseDB();
     };
 
 }

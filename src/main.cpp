@@ -66,14 +66,14 @@ int main(int argc, const char * argv[]) {
   ECE141::TestListener      aListener{};
 
 //   Test FolderReader
-  std::string dir = std::filesystem::canonical(".");
-  std::cout << "Current Directory is: " << dir << std::endl;
-  ECE141::FolderReader reader(dir.c_str());
-  std::cout << "Test FolderReader" << std::endl;
-  std::cout << (reader.exists(dir.c_str()) ? "\t The current path exist OK" : "The currnt path does not exist") << std::endl;
-  std::string extension = ".hpp";
-  std::cout << "\t Test each: input extension is " << extension << std::endl;
-  reader.each(aListener, extension);
+//  std::string dir = std::filesystem::canonical(".");
+//  std::cout << "Current Directory is: " << dir << std::endl;
+//  ECE141::FolderReader reader(dir.c_str());
+//  std::cout << "Test FolderReader" << std::endl;
+//  std::cout << (reader.exists(dir.c_str()) ? "\t The current path exist OK" : "The currnt path does not exist") << std::endl;
+//  std::string extension = ".hpp";
+//  std::cout << "\t Test each: input extension is " << extension << std::endl;
+//  reader.each(aListener, extension);
 
   if(argc>1) {
     std::ifstream theStream(argv[1]);

@@ -1,4 +1,4 @@
-CXX=g++
+CXX=g++-9
 CXXFLAGS=-g -std=c++17 -Wall -pedantic
 BIN=autograder
 

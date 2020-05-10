@@ -102,7 +102,7 @@ public:
     }
     if (!curStatement) {
         aTokenizer.restart();
-        next = new DBCmdProcessor();
+        next = new DBProcessor();
     }
     return curStatement;
   }

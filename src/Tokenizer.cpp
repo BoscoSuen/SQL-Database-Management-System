@@ -29,6 +29,10 @@ namespace ECE141 {
     }
     return false;
   }
+
+  bool Tokenizer::end(){
+    return next(remaining());
+  }
   
   Token& Tokenizer::current() {
     return tokens[index];

@@ -64,6 +64,7 @@ namespace ECE141 {
     bool          more() {return index<size();}
     bool          next(int anOffset=1);
     Token&        peek(int anOffset=1);
+    bool          end();  // move the index to the end, return success or not
     void          restart() {index=0;}
     size_t        size() {return tokens.size();}
     size_t        remaining() {return index<size() ? size()-index :0;}
