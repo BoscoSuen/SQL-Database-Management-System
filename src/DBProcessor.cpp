@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "DBProcessor.hpp"
+#include "SQLProcessor.hpp"
 #include "Tokenizer.hpp"
 #include <memory>
 #include <unordered_map>
@@ -95,6 +96,9 @@ namespace ECE141 {
           if (aTokenizer.size() != 3) {
             return StatusResult(Errors::syntaxError, 140);
           }
+          Token& token = aTokenizer.tokenAt(1);
+          if (token.type != TokenType::keyword || token.keyword != Keywords::database_kw)
+            return StatusResult(Errors::syntaxError, 140);
           DBName = aTokenizer.tokenAt(2).data;
           if (!DBNameChecker(DBName)) {
             return StatusResult(Errors::illegalIdentifier, 115);
@@ -164,6 +168,15 @@ namespace ECE141 {
     public:
         ShowDBStatement(Keywords key = Keywords::show_kw, DBProcessor *pointer = nullptr) : DBStatement(key, pointer) {}
 
+        StatusResult parse(Tokenizer &aTokenizer) {
+          if (aTokenizer.size() != 2) return StatusResult(syntaxError , 0);
+          Token& current = aTokenizer.tokenAt(1);
+          if (current.type == TokenType::keyword && current.keyword == Keywords::databases_kw)
+            return StatusResult();
+          else
+            return StatusResult(syntaxError , 0);
+        }
+      
         // input    :   std::ostream
         // output   :   StatusResult
         // LOG      :   PRINT + CHECK FILE
@@ -173,11 +186,9 @@ namespace ECE141 {
     };
 
     DBProcessor::DBProcessor(CommandProcessor *aNext) : CommandProcessor(aNext) {
-      activeDB = nullptr;
     }
 
     DBProcessor::~DBProcessor() {
-      releaseDB();
     };
 
     //create database
@@ -207,11 +218,12 @@ namespace ECE141 {
             return curStatement;
           } else {
             delete curStatement;
+            curStatement = nullptr;
           }
         }
       }
       if (!curStatement) {
-        //        next = TableCmdProcessor();
+        next = new SQLProcessor();
         aTokenizer.restart();
       }
       return curStatement;
@@ -222,91 +234,30 @@ namespace ECE141 {
       //    return StatusResult();
     }
 
-    DBProcessor &DBProcessor::releaseDB() {
-      if (activeDB != nullptr) {
-        delete activeDB;
-        activeDB = nullptr;
-      }
-      return *this;
-    }
-
     StatusResult DBProcessor::createDatabase(const std::string &aName) {
-      DBProcessor processor = releaseDB();  // only delete the current DB pointer, and can use the processor to load database
-      activeDB = processor.loadDatabase(aName);
-      if (activeDB) return StatusResult{Errors::databaseExists, 300};
-      activeDB = new Database(aName, CreateNewStorage{});
-      std::cout << "Database created" << std::endl;
-      return StatusResult(Errors::noError, 5000);
-    }
-
-    Database *DBProcessor::loadDatabase(const std::string &aName) const {
-      FolderReader *folderReader = new FolderReader(StorageInfo::getDefaultStoragePath());
-      Database *target = nullptr;
-      if (folderReader->exists(Storage::getDBPath(aName))) {
-        target = new Database(aName, OpenExistingStorage{});
-      }
-      delete folderReader;
-      return target;
+      StatusResult res = Database::createDB(aName);
+      if (res)
+        std::cout << "Database created" << std::endl;
+      return res;
     }
 
     StatusResult DBProcessor::dropDatabase(const std::string &aName) {
-      FolderReader *folderReader = new FolderReader(StorageInfo::getDefaultStoragePath());
-      if (!folderReader->exists(Storage::getDBPath(aName))) {
-        return StatusResult(Errors::unknownDatabase, 0);
-      }
-      ostringstream out;
-      out << StorageInfo::getDefaultStoragePath() << "/" << aName << ".db";
-      filesystem::remove(out.str());
-      if (activeDB && activeDB->getName().compare(aName))
-        releaseDB();
-      std::cout << "Database dropped" << std::endl;
-      return StatusResult{noError};
+      StatusResult res = Database::dropDB(aName);
+      if (res)
+        std::cout << "Database dropped" << std::endl;
+      return res;
     }
 
     StatusResult DBProcessor::useDatabase(const std::string &aName) {
-      return StatusResult{noError};
+      return Database::useDB(aName);
     }
 
 // Example ouput:
 //  Blk#  Type    Other
 //  ----------------------------
 //  0     Meta
-//    StatusResult DBProcessor::describeDatabase (const std::string &aName){
-//
-//      DBProcessor processor = releaseDB();  // only delete the current DB pointer, and can use the processor to load database
-//      activeDB = processor.loadDatabase(aName);
-//      if (!activeDB) return StatusResult(Errors::unknownDatabase , 0);
-//      StatusResult viewResult = activeDB->descDB(cout);
-//      return viewResult;
-//    }
-
-    StatusResult DBProcessor::describeDatabase(const std::string &aName) {
-      static std::unordered_map<char, std::string> BlockTypeStrings{
-              {'T', "Meta"},
-              {'D', "Data"},
-              {'E', "Entity"},
-              {'F', "Free"},
-              {'I', "Index"},
-              {'V', "Unknown"},
-      };
-      DBProcessor processor = releaseDB();  // only delete the current DB pointer, and can use the processor to load database
-      activeDB = processor.loadDatabase(aName);
-      if (!activeDB) return StatusResult(Errors::unknownDatabase, 0);
-      Storage &storage = activeDB->getStorage();
-      StorageBlock curBlock;
-      std::cout << "Blk#  Type    Other" << std::endl;
-      std::cout << "----------------------------" << std::endl;
-      for (uint32_t i = 0; i < storage.getTotalBlockCount(); ++i) {
-        StatusResult readRes = storage.readBlock(curBlock, i);
-        if (readRes) {
-          if (curBlock.header.type == 'F') {
-            continue;
-          } else {
-            std::cout << i << "     " << BlockTypeStrings[curBlock.header.type] << " " << std::endl;
-          }
-        }
-      }
-      return StatusResult{noError};
+    StatusResult DBProcessor::describeDatabase (const std::string &aName){
+      return Database::describeDB(aName);
     }
 
     StatusResult DBProcessor::showDatabases() const {

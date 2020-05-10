@@ -64,6 +64,9 @@ namespace ECE141 {
     notImplemented = 4999,
     noError=5000,
     
+    // jhx
+    decodeError = 7000,
+    
     unknownError = 10000
   };
 

@@ -15,6 +15,7 @@
 #include "FolderReader.hpp"
 #include "Storage.hpp"
 #include "View.hpp"
+#include "SQLProcessor.hpp"
 #include <filesystem>
 
 namespace ECE141 {
@@ -34,10 +35,10 @@ namespace ECE141 {
         StatusResult describeDatabase (const std::string &aName);
         StatusResult showDatabases () const;
 
-    protected:
-        Database *activeDB;
-        Database* loadDatabase(const std::string &aName) const;
-        DBProcessor& releaseDB();
+//    protected:
+//        Database *activeDB;
+//        Database* loadDatabase(const std::string &aName) const;
+//        DBProcessor& releaseDB();
     };
 
 }

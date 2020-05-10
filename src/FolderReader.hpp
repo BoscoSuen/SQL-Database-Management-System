@@ -42,8 +42,6 @@ namespace ECE141 {
 
     virtual bool  exists(const std::string &aPath) {
                     //STUDENT: add logic to see if FOLDER at given path exists.
-                    if (fs::exists(aPath)) std::clog << aPath << "  There exists a file" << std::endl;
-                    else std::clog << aPath << "  There doesn't exists a file" << std::endl;
                     return fs::exists(aPath);
                   }
 

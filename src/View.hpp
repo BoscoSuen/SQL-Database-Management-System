@@ -10,33 +10,60 @@
 #define View_h
 
 #include <iostream>
+#include <unordered_map>
 #include "StorageBlock.hpp"
 #include "Storage.hpp"
+#include "Schema.hpp"
 #include "Database.hpp"
+#include "Attribute.hpp"
 
 using namespace std;
 
 namespace ECE141 {
-  //completely generic view, which you will subclass to show information
-  class View {
-  public:
-    virtual         ~View() {}
-    virtual bool    show(std::ostream &aStream);
-  };
+    class Schema;
 
-  /*
-  class DescView : public View {
-  public:
-    DescView(Storage& storage);
+    //completely generic view, which you will subclass to show information
+    class View {
+    public:
+        virtual         ~View() {}
+        virtual bool    show(std::ostream &aStream) = 0;
+    };
 
-    ~DescView() {};
-    bool            show(std::ostream &aStream);
+    class DescDBView : public View {
+    public:
+        DescDBView(Storage& storage);
 
-  protected:
-    ostream               stream;
-    Storage&              storage;
-  };
-   */
+        ~DescDBView() {};
+        bool            show(std::ostream &aStream);
+
+    protected:
+        ostream               stream;
+        Storage&              storage;
+    };
+
+    class ShowTableView : public View {
+    public:
+        ShowTableView(Storage& storage);
+
+        ~ShowTableView() {};
+        bool            show(std::ostream & aStream);
+
+    protected:
+        ostream               stream;
+        Storage&              storage;
+    };
+
+    class DescTableView : public View {
+    public:
+        DescTableView(Storage& storage);
+        DescTableView(Schema& aSchema);
+        ~DescTableView() {};
+        bool            show(std::ostream & aStream);
+
+    protected:
+        ostream               stream;
+        Schema&               schema;
+    };
 
 }
 

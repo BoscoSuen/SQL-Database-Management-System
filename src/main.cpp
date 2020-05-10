@@ -29,7 +29,8 @@ static std::map<int, std::string> theErrorMessages = {
   {ECE141::unknownCommand, "Unknown command"},
   {ECE141::unknownDatabase,"Unknown database"},
   {ECE141::unknownTable,   "Unknown table"},
-  {ECE141::unknownError,   "Unknown error"}
+  {ECE141::unknownError,   "Unknown error"},
+  {ECE141::noDatabaseSpecified, "No Database Specified"}
 };
 
 void showError(ECE141::StatusResult &aResult) {
