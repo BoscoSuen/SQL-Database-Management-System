@@ -16,6 +16,7 @@
 #include "Storage.hpp"
 #include "View.hpp"
 #include "Schema.hpp"
+#include "Row.hpp"
 #include "FolderReader.hpp"
 
 using namespace std;
@@ -50,11 +51,16 @@ namespace ECE141 {
     StatusResult      loadSchema();
     StatusResult      getSchemaBlockNum(std::string aName);
 
+    Schema            getSchema(string& aName);
+
     StatusResult      createTable(const Schema &aSchema) ;
     StatusResult      showTables(ostream &anOutput);
-
-
     StatusResult      dropTable(const string &aName);
+
+    StatusResult      insert(Row& aRow, string aName);
+    StatusResult      deleteRow(string aTableName);
+
+
 
   protected:
     std::string     name;
@@ -69,7 +75,6 @@ namespace ECE141 {
     Database(const std::string aPath, CreateNewStorage);
     Database(const std::string aPath, OpenExistingStorage);
   };
-  
 }
 
 #endif /* Database_hpp */

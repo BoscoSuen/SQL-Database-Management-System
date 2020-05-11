@@ -16,7 +16,7 @@
 #include "Attribute.hpp"
 #include "Errors.hpp"
 #include "Storage.hpp"
-//#include "Row.hpp"
+#include "Row.hpp"
 
 namespace ECE141 {
   
@@ -56,17 +56,22 @@ namespace ECE141 {
     std::string           getPrimaryKeyName() const;
     void                  setPrimaryKeyName(std::string name) {primaryKeyName = name;};
     bool                  hasPrimaryKeyName;
-    uint32_t              getNextAutoIncrementValue() {prevValue++; return prevValue;};
-    void                  setAutoIncreasing(bool a) {AutoIncreasing = a; prevValue = -1;};
+    uint32_t              getNextAutoIncrementValue() {prevValue++; return prevValue - 1;};
+    void                  setAutoIncreasing(bool a) {AutoIncreasing = a; prevValue = 0;};
 
     void                  setChanged(bool a) {changed = a;};
+    void                  setPrevValue(uint32_t number) {prevValue = number;}
     //STUDENT: Do you want to provide an each() method for observers?
     
     //friend class Database; //is this helpful?
 
     StatusResult    encode(std::ostringstream &aWriter) const;
+
+    StatusResult    encodeKeyValues(StorageBlock& aBlock, KeyValues& data);
     
     static StatusResult decode(Schema& schema , std::string str);
+
+    bool                  validRow(KeyValues data);
 
   protected:
     

@@ -37,7 +37,7 @@ namespace ECE141 {
       Database* newPointer = new Database(aPath , CreateNewStorage{});
       delete newPointer;
       return StatusResult();
-    };
+    }
 
     StatusResult Database::dropDB(const std::string aPath) {
       FolderReader *folderReader = new FolderReader(StorageInfo::getDefaultStoragePath());
@@ -208,11 +208,70 @@ namespace ECE141 {
       StatusResult loadRes = loadSchema();
       if (!loadRes) return {Errors::unknownDatabase};
       if (schemas.count(aName)) {
+        deleteRow(aName);
         uint32_t blockNum = schemas.at(aName);
         StorageBlock freeBlock{BlockType::free_block};
         storage.writeBlock(freeBlock, blockNum);
         schemas.erase(aName);
         return StatusResult{Errors::noError};
       } else return StatusResult{Errors::unknownTable};
+    }
+
+    Schema Database::getSchema(string& aName) {
+      StatusResult queryRes = activeDB->getSchemaBlockNum(aName);
+      if (!queryRes) return Schema("");
+      int blockNumber = queryRes.value;
+      StorageBlock curBlock;
+      StatusResult readRes = activeDB->getStorage().readBlock(curBlock , blockNumber);
+      if (!readRes) return Schema("");
+      Schema curSchema = Schema("");
+      StatusResult decodeResult = Schema::decode(curSchema, curBlock.data);
+      return curSchema;
+    }
+
+    StatusResult Database::insert(Row& aRow, string aName) {
+      StatusResult load = loadSchema();
+      if (!load) return {Errors::unknownDatabase };
+      if (schemas.count(aName)) {
+        StatusResult freeBlockNumResult = storage.findFreeBlockNum();
+        aRow.setBlockNum(freeBlockNumResult.value);
+        Schema curSchema = getSchema(aName);
+        // check if data(all the key values with attr) is valid
+        if (!curSchema.validRow(aRow.getData())) return StatusResult{Errors::invalidAttribute};
+        for (auto it = aRow.getData().begin(); it != aRow.getData().end(); ++it) {
+          if (curSchema.getPrimaryKeyName() == it->first) {
+            it->second.value = curSchema.getNextAutoIncrementValue();
+          }
+        }
+        StorageBlock curBlock(BlockType::data_block);
+        string tableName = aName + "@";
+        strcpy(curBlock.data, tableName.c_str());
+        StatusResult encodeRes = curSchema.encodeKeyValues(curBlock, aRow.getData());
+        if (encodeRes) storage.addBlock(curBlock);
+        return StatusResult{Errors::noError};
+      } else {
+        return StatusResult{Errors::unknownTable};
+      }
+    }
+
+    StatusResult Database::deleteRow(string aName) {
+      StatusResult load = loadSchema();
+      if (schemas.count(aName)) {
+        Schema curSchema = getSchema(aName);
+        StorageBlock curBlock;
+        for (uint32_t i = 0; i < storage.getTotalBlockCount(); ++i) {
+          StatusResult readRes = storage.readBlock(curBlock, i);
+          if (readRes) {
+            if (curBlock.header.type == 'D' && string(curBlock.data).find("@") != -1 && string(curBlock.data).substr(0,string(curBlock.data).find("@")) == curSchema.getName()) {
+              // current block is row block
+              StorageBlock freeBlock{BlockType::free_block};
+              storage.writeBlock(freeBlock, i);
+            }
+          }
+        }
+        return StatusResult{Errors::noError};
+      } else {
+        return StatusResult{Errors::unknownTable};
+      }
     }
 }

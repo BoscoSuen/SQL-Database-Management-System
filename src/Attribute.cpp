@@ -24,7 +24,7 @@ namespace ECE141 {
       this->hasDefault = aCopy.getHasDefault();
       this->defaultValue = aCopy.getDefaultValue();
       this->varCharOther = aCopy.getVarCharOther();
-    };
+    }
 
     Attribute::~Attribute(){};
 

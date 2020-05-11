@@ -1,0 +1,9 @@
+src/CMakeLists.txt
+src/cmake-build-*/
+.DS_Store
+*/.DS_Store
+.idea/
+.vscode/
+database/database.xcodeproj/
+tempdb/
+.history/

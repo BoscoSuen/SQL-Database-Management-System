@@ -44,6 +44,9 @@ namespace ECE141 {
     invalidAttribute=410,
     invalidArguments=420,
     keyValueMismatch=430, //# of fieldnames doesn't match values...
+    // jhx
+    duplicateAttributes = 7001,
+    missingAttributes = 7002,
     
     //storage/io related...
     readError=500,
@@ -66,6 +69,7 @@ namespace ECE141 {
     
     // jhx
     decodeError = 7000,
+
     
     unknownError = 10000
   };

@@ -15,13 +15,10 @@
 #include <unordered_map>
 #include "Storage.hpp"
 #include "Database.hpp"
+#include "Value.hpp"
 
 namespace ECE141 {
 //    using varType = std::variant<bool , float , int , /*time ,*/ std::string>;
-
-    enum class DataType {
-        no_type='N', bool_type='B', datetime_type='D', float_type='F', int_type='I',  varchar_type='V',
-    };
 
     class Attribute : public Storable {
     protected:

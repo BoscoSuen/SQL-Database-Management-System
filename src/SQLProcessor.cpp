@@ -322,7 +322,6 @@ namespace ECE141 {
         } else if (firstToken.keyword == Keywords::show_kw) {
           curStatement = new ShowTablesStatement(Keywords::show_kw , this);
         }
-        // reserve space for insert/update/delete
         if (curStatement) {
           if (curStatement->parse(aTokenizer)) {
             aTokenizer.end();
@@ -333,7 +332,7 @@ namespace ECE141 {
         }
       }
       if (!curStatement) {
-        // next = new NextProcessor();
+        next = new RecordProcessor();
         aTokenizer.restart();
       }
       return curStatement;
@@ -405,7 +404,4 @@ namespace ECE141 {
         }
       } else return StatusResult(Errors::noDatabaseSpecified);
     }
-
-
-
 }

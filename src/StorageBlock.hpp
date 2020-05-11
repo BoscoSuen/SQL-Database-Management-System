@@ -15,16 +15,13 @@
 #include <map>
 #include <variant>
 #include <iostream>
+#include "Value.hpp"
 
 namespace ECE141 {
 
   //a "storage" file is comprised of fixed-sized blocks (defined below)
 
   const size_t kPayloadSize = 1012; //area reserved in storage-block for user data...
-  
-  using ValueType = std::variant<int, double, std::string>;
-
-  using KeyValues = std::map<const std::string, ValueType>;
 
   enum class BlockType {
     meta_block='T',

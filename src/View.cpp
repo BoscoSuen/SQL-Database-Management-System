@@ -12,46 +12,99 @@
 #include <cstdio>
 
 namespace ECE141 {
-    DescDBView::DescDBView(Storage& aStorage) : stream(nullptr), storage(aStorage) {}
+  static const std::string CornerSep = "+";
+  static const std::string ColumnSep = "|";
+  static const std::string RowSep = "-";
 
-    bool DescDBView::show(std::ostream &aStream) {
-      static std::unordered_map<char, std::string> BlockTypeStrings{
-              {'T', "Meta"},
-              {'D', "Data"},
-              {'E', "Entity"},
-              {'F', "Free"},
-              {'I', "Index"},
-              {'V', "Unknow"},
-      };
-      bool status = true;
-      try {
-        StorageBlock curBlock;
-        aStream << "Blk#  Type    Other" << std::endl;
-        aStream << "----------------------------" << std::endl;
-        for (uint32_t i = 0; i < storage.getTotalBlockCount(); ++i) {
-          StatusResult readRes = storage.readBlock(curBlock, i);
-          if (readRes) {
-            if (curBlock.header.type == 'F') {
-              continue;
-            } else {
-              aStream << i << " " << BlockTypeStrings[curBlock.header.type] << std::endl;
-            }
-          }
-        }
-      } catch(...) {
-        status = false;
+  void View::printFormatedData(std::string str, int leng) {
+      std::cout << " ";
+      std::cout << str;
+      for (int i = str.size() ; i < leng - 1; i ++) {
+        std::cout << " ";
       }
-      return status;
-    }
+  }
 
-    ShowTableView::ShowTableView(Storage& aStorage) : storage(aStorage) , stream(nullptr){};
-
-    void printRow(std::ostream &aStream , int length) {
-      aStream << "+" ;
-      for (int i = 0 ; i < length ; i++ )
-        aStream << "-" ;
-      aStream << "+" << std::endl ;
+  void View::printRowSeparator() {
+    std::cout << CornerSep;
+    for (int j = 0 ; j < length.size() ; j++) {
+      int leng = length[j];
+      for (int i = 0 ; i < leng ; i++) {
+        std::cout << RowSep;
+      }
+      std::cout << CornerSep;
     }
+    std::cout << std::endl;
+  }
+
+  void View::printRow(std::vector<std::string> array) {
+    std::cout << ColumnSep;
+    for (int i = 0 ; i < array.size() ; i++) {
+      printFormatedData(array[i] , length[i]);
+      std::cout << ColumnSep;
+    }
+    std::cout << std::endl;
+  }
+
+  DescDBView::DescDBView(Storage& aStorage) : stream(nullptr), storage(aStorage) {
+    length = {6 , 13 , 25};
+    total = 0; for (int i : length) total += i;
+  }
+
+  bool DescDBView::show(std::ostream &aStream) {
+    printRowSeparator();
+    std::vector<std::string> head = {"Blk#" , "Type" , "Other"};
+    printRow( head );
+    printRowSeparator();
+//    aStream << "Blk#  Type    Other" << std::endl;
+//    aStream << "----------------------------" << std::endl;
+    int rowsCount = 0;
+    StorageBlock curBlock;
+    for (uint32_t i = 0; i < storage.getTotalBlockCount(); ++i) {
+      StatusResult readRes = storage.readBlock(curBlock, i);
+//      std::cout << curBlock.header.type << curBlock.data << std::endl;
+      if (!readRes) {return false;}
+      rowsCount ++;
+      switch (curBlock.header.type) {
+        case 'T':{
+          std::vector<std::string> tmp = {to_string(i) , BlockTypeStrings[curBlock.header.type] , ""};
+          printRow(tmp);
+          break;
+        }
+        case 'D':{
+          std::vector<std::string> array = split_str(curBlock.data, "@");
+          std::vector<std::string> tmp = {to_string(i) , "data" , "\""+ array[0] + "\""};
+          printRow(tmp);
+          break;
+        }
+        case 'S': {
+          
+        }
+        case 'E':{
+          Schema schema("");
+          Schema::decode(schema , curBlock.data);
+          std::vector<std::string> tmp = {to_string(i) , "schema" , "\""+ schema.getName() + "\""};
+          printRow(tmp);
+          break;
+        }
+        default:{
+          rowsCount--;
+          break;
+        }
+      }
+    }
+    printRowSeparator();
+    aStream << to_string(rowsCount) << " rows in set" << std::endl;
+    return true;
+  }
+
+  ShowTableView::ShowTableView(Storage& aStorage) : storage(aStorage) , stream(nullptr){};
+
+  void printARow(std::ostream &aStream , int length) {
+    aStream << "+" ;
+    for (int i = 0 ; i < length ; i++ )
+      aStream << "-" ;
+    aStream << "+" << std::endl ;
+  }
 
     bool ShowTableView::show(std::ostream &aStream) {
       bool status = true;
@@ -75,11 +128,11 @@ namespace ECE141 {
         }
 
         int width = maxLength + 2;
-        printRow(aStream , width);
+        printARow(aStream , width);
         aStream << "| " << Database::getDBInstance()->getName();
         for (int j = Database::getDBInstance()->getName().length() ; j < maxLength ; j++) aStream << " " ;
         aStream << " |" << std::endl;
-        printRow(aStream , width);
+        printARow(aStream , width);
         for (uint32_t i = 0; i < storage.getTotalBlockCount(); ++i) {
           StatusResult readRes = storage.readBlock(curBlock, i);
           if (readRes && curBlock.header.type == 'E') {
@@ -94,7 +147,7 @@ namespace ECE141 {
             aStream << " |" << std::endl;
           }
         }
-        printRow(aStream , width);
+        printARow(aStream , width);
       } catch(...) {
         status = false;
       }
@@ -128,7 +181,7 @@ namespace ECE141 {
       aStream << "| " << defaultVal;
       for (int i = defaultVal.size(); i < lenDefault; ++i) aStream << " ";
       string extra = attr.getAutoIncreasing() ? "auto_increment" : "";
-      extra += !isPrimaryKey.empty() ? "primary key" : "";
+      extra += !isPrimaryKey.empty() ? " primary key" : "";
       aStream << "| " << extra;
       for(int i = extra.size(); i < lenExtra; ++i) aStream << " ";
       aStream << "|" << endl;

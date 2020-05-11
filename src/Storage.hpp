@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include "Errors.hpp"
 #include "StorageBlock.hpp"
+#include "Value.hpp"
 
 using namespace std;
 
@@ -32,12 +33,6 @@ namespace ECE141 {
 
     struct CreateNewStorage {};
     struct OpenExistingStorage {};
-
-    struct Storable {
-      virtual StatusResult  encode(std::ostringstream &aWriter) const =0;
-//      virtual StatusResult  decode(std::istream &aReader)=0;
-//    virtual BlockType     getType() const=0; //what kind of block is this?
-    };
 
     class Node {
     public:
@@ -106,6 +101,8 @@ namespace ECE141 {
         StatusResult    save(Storable &aStorable); //using a stream api
         StatusResult    load(Storable &aStorable); //using a stream api
 
+        StatusResult    findFreeBlockNum();
+
         //low-level IO...
         StatusResult    readBlock(StorageBlock &aBlock, uint32_t aBlockNumber);
         StatusResult    writeBlock(StorageBlock &aBlock, uint32_t aBlockNumber);
@@ -121,7 +118,7 @@ namespace ECE141 {
 
         StorageBlock    block;
         std::string     name;
-        StatusResult    findFreeBlockNum();
+
         std::fstream    stream;
     };
 

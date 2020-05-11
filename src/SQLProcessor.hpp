@@ -15,6 +15,8 @@
 #include "Schema.hpp"
 #include "Database.hpp"
 #include "Attribute.hpp"
+#include "Row.hpp"
+#include "RecordProcessor.hpp"
 
 class Statement;
 class Database; //define this later...
@@ -36,12 +38,6 @@ namespace ECE141 {
     StatusResult dropTable(const std::string &aName);
     StatusResult describeTable(const std::string &aName) const;
     StatusResult showTables();
-    
-/*  do these in next assignment
-    StatusResult insert();
-    StatusResult update();
-    StatusResult delete();
-*/
     
 //  protected:
     //do you need other data members?
