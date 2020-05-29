@@ -23,7 +23,7 @@ namespace ECE141 {
     database_kw, databases_kw, datetime_kw, decimal_kw, default_kw, delete_kw,
     describe_kw, distinct_kw, double_kw, drop_kw, explain_kw,
     float_kw, foreign_kw, from_kw, full_kw, group_kw, help_kw,
-    in_kw, inner_kw, insert_kw, integer_kw, into_kw, join_kw, key_kw, left_kw,
+    in_kw, indexes_kw , inner_kw, insert_kw, integer_kw, into_kw, join_kw, key_kw, left_kw, limit_kw,
     max_kw, min_kw, modify_kw, not_kw,  null_kw, on_kw, or_kw, order_kw, outer_kw,
     primary_kw, quit_kw, references_kw, right_kw,
     select_kw, self_kw, set_kw, show_kw, sum_kw,

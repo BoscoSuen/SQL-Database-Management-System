@@ -20,8 +20,8 @@ namespace ECE141 {
       //WINDOWS USERS:  Use forward slash (/) not backslash (\) to separate paths.
       //                (Windows convert forward slashes for you)
       
-//    const char* thePath = "/Users/suen/Desktop/ECE141B/ece141-sp20-assignment5-zhiqiang_sun_hongxiang_jiang/tempdb";
-      const char* thePath = std::getenv("DB_PATH");
+    const char* thePath = "/Users/suen/Desktop/ECE141B/ece141-sp20-assignment8-zhiqiang_sun_hongxiang_jiang/tempdb";
+//      const char* thePath = std::getenv("DB_PATH");
       return thePath;
 //    return "/tmp";
     }
@@ -75,7 +75,7 @@ namespace ECE141 {
         stream.open(thePath, fstream::in | fstream::out | fstream::binary);
         if (isReady()) {
 //        std::clog << " Storage Constructor : file is open and good to add block" << std::endl;
-          StatusResult result = addBlock(block);
+          /*StatusResult result =*/ addBlock(block);
           stream.close();
           stream.clear();
 //        if (result) std::clog << " Storage Constructor : success add block" << std::endl;
@@ -95,7 +95,7 @@ namespace ECE141 {
         stream.open(thePath, fstream::in | fstream::out | fstream::binary);
         if (isReady()) {
           stream.seekg(stream.tellg(), stream.beg);
-          StatusResult result = readBlock(block, 0);
+          /* StatusResult result = */ readBlock(block, 0);
         }
       } catch (...) {
         cout << "Cannot read database file" << endl;

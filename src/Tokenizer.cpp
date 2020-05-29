@@ -20,8 +20,8 @@ namespace ECE141 {
       return tokens[anOffset];
     }
     throw std::out_of_range("invalid offset");
-  }  
-  
+  }
+
   bool Tokenizer::next(int anOffset) {
     if(index+anOffset<=size()) {
       index+=anOffset;
@@ -31,7 +31,7 @@ namespace ECE141 {
   }
 
   bool Tokenizer::end(){
-    return next(remaining());
+    return next((int)(remaining()));
   }
   
   Token& Tokenizer::current() {
@@ -150,9 +150,12 @@ namespace ECE141 {
         tokens.push_back(theToken);
       }
       else if(isOperator(theChar)) {
-        std::string temp;
+        std::string temp = readWhile(isOperator);
         Token theToken{TokenType::operators};
-        theToken.data.push_back(input.get());
+//        theToken.data.push_back(input.get());
+        theToken.data = temp;
+        if (gOperators.find(temp) == gOperators.end())
+          return StatusResult(Errors::unkownOperator , 0);
         theToken.op=gOperators[temp];
         tokens.push_back(theToken);
       }
@@ -228,5 +231,15 @@ namespace ECE141 {
     }
   }
   
+
+  // -- jhx
+  bool  Tokenizer::keywordsMatch(std::vector<Keywords>& pattern) {
+    for (Keywords key : pattern) {
+      if (!more() || current().type != TokenType::keyword || current().keyword != key)
+        return false;
+      next();
+    }
+    return true;
+  }
   
 }

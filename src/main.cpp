@@ -60,8 +60,8 @@ ECE141::StatusResult handleInput(std::istream &aStream, ECE141::CommandProcessor
 //----------------------------------------------
 
 int main(int argc, const char * argv[]) {
-  //const char* path = ECE141::StorageInfo::getDefaultStoragePath(); 
-
+  //const char* path = ECE141::StorageInfo::getDefaultStoragePath();
+  
   ECE141::AppCmdProcessor   theProcessor;  //add your db processor here too!
   ECE141::StatusResult      theResult{};
   ECE141::TestListener      aListener{};

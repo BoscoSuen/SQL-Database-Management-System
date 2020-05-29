@@ -75,6 +75,8 @@ namespace ECE141 {
     bool          skipIf(TokenType aTokenType);
     bool          skipIf(char aChar);
 
+    bool          keywordsMatch(std::vector<Keywords>& pattern);
+    
     void          dump(); //utility
 
   protected:

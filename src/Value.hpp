@@ -45,9 +45,10 @@ namespace ECE141 {
       this->value = another.value;
       this->type = another.type;
     }
-
+    
     operator string();
 
+    bool operator<(const ValueType& valueType) const;
 
     Value value;
     DataType type;

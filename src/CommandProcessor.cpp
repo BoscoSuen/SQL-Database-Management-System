@@ -30,7 +30,8 @@ namespace ECE141 {
     // USE: try to make/run statement from tokens; return error if you can't...
     //      This version will work fine for you in most cases...
   StatusResult CommandProcessor::processInput(Tokenizer &aTokenizer) {
-      std::unique_ptr<Statement> theStatement(getStatement(aTokenizer));
+    std::unique_ptr<Statement> theStatement(getStatement(aTokenizer));
+    
       // keep process statement
       if(theStatement) {
           return interpret(*theStatement);

@@ -50,23 +50,23 @@ namespace ECE141 {
         DataType            getType() const {return type;}
         string              getTypeString();
 
-        bool                getAutoIncreasing() const {return autoIncrease;};
-        void                setAutoIncreasing(bool a) {autoIncrease = a;};
+        bool                getAutoIncreasing() const {return autoIncrease;}
+        void                setAutoIncreasing(bool a) {autoIncrease = a;}
 
-        bool                getPrimary() const {return primary;};
-        void                setPrimary(bool a) {primary = a;};
+        bool                getPrimary() const {return primary;}
+        void                setPrimary(bool a) {primary = a;}
 
-        bool                getNullable() const {return nullable;};
-        void                setNullable(bool a) {nullable = a;};
+        bool                getNullable() const {return nullable;}
+        void                setNullable(bool a) {nullable = a;}
 
-        bool                getHasDefault() const {return hasDefault;};
-        void                setHasDefault(bool a) {hasDefault = a;};
+        bool                getHasDefault() const {return hasDefault;}
+        void                setHasDefault(bool a) {hasDefault = a;}
 
-        std::string         getDefaultValue() const {return defaultValue;};
+        std::string         getDefaultValue() const {return defaultValue;}
         bool                setDefaultValue(std::string a) ;
       
-        void                setVarCharOther(std::string a) {varCharOther = a;};
-        std::string         getVarCharOther() const {return varCharOther;};
+        void                setVarCharOther(std::string a) {varCharOther = a;}
+        std::string         getVarCharOther() const {return varCharOther;}
 
         StatusResult  encode(std::ostringstream &aWriter) const;
       

@@ -12,16 +12,18 @@ namespace ECE141 {
 
  //STUDENT: Implement the Schema class here...
 
-  Schema::Schema(const std::string aName) : name(aName), attributes(), changed(false), blockNum(0) , hasPrimaryKeyName(false) , primaryKeyName("") , AutoIncreasing(false) , prevValue(0){}
+  Schema::Schema(const std::string aName) : name(aName), attributes(), changed(false), blockNum(0) , primaryKeyName("") , AutoIncreasing(false) , prevValue(0){}
 
-  Schema::Schema(const Schema &aCopy) : name(aCopy.name),  changed(aCopy.changed), blockNum(aCopy.blockNum) , hasPrimaryKeyName(aCopy.hasPrimaryKeyName) , primaryKeyName(aCopy.primaryKeyName) , AutoIncreasing(aCopy.AutoIncreasing) , prevValue(0){
+Schema::Schema(const Schema &aCopy) : name(aCopy.name),  changed(aCopy.changed), blockNum(aCopy.blockNum), primaryKeyName(aCopy.primaryKeyName) , AutoIncreasing(aCopy.AutoIncreasing) , prevValue(aCopy.prevValue){
     for (Attribute att : aCopy.attributes) {
       attributes.push_back(att);
     }
 //    attributes(aCopy.attributes);
   }
 
-  Schema::~Schema(){};
+  Schema::~Schema(){}
+
+
 
   Schema& Schema::addAttribute(const Attribute &anAttribute) {
    attributes.push_back(anAttribute);
@@ -58,8 +60,8 @@ namespace ECE141 {
     // get first pos after write the table name:
     int pos = 0;
     while (pos < kPayloadSize && aBlock.data[pos] != '\0') { pos++; }
-    stringstream ss;
     for (auto attr : attributes) {
+      stringstream ss;
       if (data.count(attr.getName())) {
         string name = attr.getName();
         ValueType valueType = data.at(name);
@@ -101,9 +103,48 @@ namespace ECE141 {
     return StatusResult();
   }
 
+  Value getData(string str) {
+    if (str.find("true") != -1) return true;
+    else if(str.find("false") != -1) return false;
+    for (int i = 0; i < str.size(); ++i) {
+      if (!isdigit(str[i]) && str[i] != '.') return str;
+      else if (str[i] == '.') {
+        // float
+        istringstream is(str);
+        float res;
+        is >> res;
+        return res;
+      }
+    }
+    istringstream is(str);
+    uint32_t res;
+    is >> res;
+    return res;
+  }
+
+  StatusResult Schema::decodeWithProperties(StorageBlock& curBlock, vector<string>& properties, KeyValues& keyValues) {
+    // @ << name << "|" << DataTypeToStr[valueType.type] << "|" << data << "*"
+    vector<string> strs = split_str(curBlock.data, "@" , 1);
+    string dataList = strs[1];
+    vector<string> pairs = split_str(dataList, "*");
+    for (string pair : pairs) {
+      if (pair.size() == 0) continue;
+      vector<string> kvpairs = split_str(pair, "|");
+      // name|type|data   KeyValues<string, ValueType<value, data>>
+      string name(kvpairs[0]);
+      DataType type(StrToDataType.at(kvpairs[1]));
+      Value data(getData(kvpairs[2]));
+      ValueType valueType(data, type);
+//      if (properties.empty() || (find(properties.begin(), properties.end(), name) != properties.end())) {
+      keyValues[name] = valueType;
+//      }
+    }
+    return StatusResult{Errors::noError};
+  }
+
+
   std::string Schema::getPrimaryKeyName() const {
-    if (hasPrimaryKeyName) return primaryKeyName;
-    else return "";
+    return primaryKeyName.size() ? primaryKeyName : "id";
   }
 
   bool Schema::validRow(KeyValues data) {
@@ -115,5 +156,14 @@ namespace ECE141 {
 //      }
 //    }
     return true;
+  }
+
+  DataType Schema::getPrimaryKeyType() const {
+    for (auto& attr: attributes) {
+      if (attr.getPrimary()) {
+        return attr.getType();
+      }
+    }
+    return DataType::int_type;  // set default
   }
 }

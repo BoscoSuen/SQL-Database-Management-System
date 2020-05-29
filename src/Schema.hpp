@@ -54,12 +54,13 @@ namespace ECE141 {
     //StatusResult          validate(KeyValues &aList);
     
     std::string           getPrimaryKeyName() const;
-    void                  setPrimaryKeyName(std::string name) {primaryKeyName = name;};
-    bool                  hasPrimaryKeyName;
-    uint32_t              getNextAutoIncrementValue() {prevValue++; return prevValue - 1;};
-    void                  setAutoIncreasing(bool a) {AutoIncreasing = a; prevValue = 0;};
+    void                  setPrimaryKeyName(std::string name) {primaryKeyName = name;}
+    DataType              getPrimaryKeyType() const;
+    uint32_t              getNextAutoIncrementValue() {prevValue++; return prevValue - 1;}
+    uint32_t              getPrevValue(){return prevValue;}
+    void                  setAutoIncreasing(bool a) {AutoIncreasing = a; prevValue = 1;}
 
-    void                  setChanged(bool a) {changed = a;};
+    void                  setChanged(bool a) {changed = a;}
     void                  setPrevValue(uint32_t number) {prevValue = number;}
     //STUDENT: Do you want to provide an each() method for observers?
     
@@ -71,7 +72,10 @@ namespace ECE141 {
     
     static StatusResult decode(Schema& schema , std::string str);
 
-    bool                  validRow(KeyValues data);
+    StatusResult    decodeWithProperties(StorageBlock& curBlock, vector<string>& properties, KeyValues& keyValues);
+
+
+      bool                  validRow(KeyValues data);
 
   protected:
     

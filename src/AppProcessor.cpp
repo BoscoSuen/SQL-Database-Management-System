@@ -16,7 +16,7 @@ namespace ECE141 {
 
   class HelpStatement : public Statement {
   public:
-      HelpStatement(Keywords aStatementType , Keywords key) : Statement(aStatementType) , key(key) {};
+      HelpStatement(Keywords aStatementType , Keywords key) : Statement(aStatementType) , key(key) {}
       unordered_map<Keywords, std::string> help_keywd_map = {
               {Keywords::help_kw, "\t -- help  - shows this list of commands\n"},
               {Keywords::version_kw, "\t -- version  -- shows the current version of this application\n"},

@@ -69,7 +69,7 @@ namespace ECE141 {
     
     // jhx
     decodeError = 7000,
-
+    unkownOperator = 7004,
     
     unknownError = 10000
   };

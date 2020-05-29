@@ -7,7 +7,7 @@ using namespace std;
 namespace ECE141 {
     bool hasExtension(const string &aPath, const string &anExtension) {
       if (!anExtension.empty()) {
-        int idx = aPath.rfind('.');
+        int idx = (int)(aPath.rfind('.'));
         if (idx != -1) {
           return aPath.substr(idx + 1) == (anExtension.find('.') != -1 ? anExtension.substr(1) : anExtension);
         }
@@ -23,6 +23,6 @@ namespace ECE141 {
           aListener(p.path());
         }
       }
-    };
+    }
 }
 

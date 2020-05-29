@@ -32,7 +32,7 @@ namespace ECE141 {
         return false;
       }
       return true;
-    };
+    }
 
     class TableStatement : public Statement {
     public:
@@ -202,7 +202,6 @@ namespace ECE141 {
           if (cur.type == TokenType::keyword && cur.keyword == Keywords::key_kw){
             att.setPrimary(true);
             att.setNullable(false);
-            schema.hasPrimaryKeyName = true;
             schema.setPrimaryKeyName(att.getName());
           }
           else
@@ -295,7 +294,7 @@ namespace ECE141 {
         ShowTablesStatement(Keywords key , SQLProcessor* pointer) : TableStatement(key , pointer) {}
 
         StatusResult parse(Tokenizer& aTokenizer) {
-          if (aTokenizer.size() != 2 || aTokenizer.tokenAt(1).type != TokenType::keyword)
+          if (aTokenizer.size() != 2 || aTokenizer.tokenAt(1).keyword != Keywords::tables_kw)
             return StatusResult(Errors::syntaxError , 0);
           return StatusResult();
         }
@@ -305,9 +304,9 @@ namespace ECE141 {
         }
     };
 
-    SQLProcessor::SQLProcessor(CommandProcessor* aNext) : CommandProcessor(aNext) {};
+    SQLProcessor::SQLProcessor(CommandProcessor* aNext) : CommandProcessor(aNext) {}
 
-    SQLProcessor::~SQLProcessor() {};
+    SQLProcessor::~SQLProcessor() {}
 
     Statement* SQLProcessor::getStatement(Tokenizer& aTokenizer) {
       Statement *curStatement = nullptr;
@@ -328,6 +327,7 @@ namespace ECE141 {
             return curStatement;
           }else {
             delete curStatement;
+            curStatement = nullptr;
           }
         }
       }

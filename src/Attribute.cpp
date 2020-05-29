@@ -11,9 +11,9 @@
 namespace ECE141 {
     //STUDENT: Implement the attribute class here...
 
-    Attribute::Attribute(DataType aType) : type(aType) , autoIncrease(false) , primary(false) , nullable(true) , hasDefault(false) , defaultValue("") , varCharOther(""){};
+    Attribute::Attribute(DataType aType) : type(aType) , autoIncrease(false) , primary(false) , nullable(true) , hasDefault(false) , defaultValue("") , varCharOther(""){}
 
-    Attribute::Attribute(std::string aName, DataType aType) : name(aName),type(aType) , autoIncrease(false) , primary(false) , nullable(true) , hasDefault(false) , defaultValue("") , varCharOther("") {};
+    Attribute::Attribute(std::string aName, DataType aType) : name(aName),type(aType) , autoIncrease(false) , primary(false) , nullable(true) , hasDefault(false) , defaultValue("") , varCharOther("") {}
 
     Attribute::Attribute(const Attribute &aCopy) {
       this->name = aCopy.getName();
@@ -26,7 +26,7 @@ namespace ECE141 {
       this->varCharOther = aCopy.getVarCharOther();
     }
 
-    Attribute::~Attribute(){};
+    Attribute::~Attribute(){}
 
     bool Attribute::setDefaultValue(std::string a) {
       defaultValue = a;

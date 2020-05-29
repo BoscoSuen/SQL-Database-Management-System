@@ -32,7 +32,7 @@ namespace ECE141 {
       char firstChar = DBName[0];
       if (charInList(firstChar)) return false;
       // rest of them check
-      for (int i = 0; i < DBName.size(); i++) {
+      for (int i = 0; i < (int)(DBName.size()); i++) {
         char cur = DBName[i];
         if (i > 0 && charInList(cur)) continue;
         if (cur >= 'a' && cur <= 'z') continue;
@@ -40,7 +40,7 @@ namespace ECE141 {
         return false;
       }
       return true;
-    };
+    }
 
     class DBStatement : public Statement {
     public:

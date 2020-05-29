@@ -17,6 +17,7 @@
 #include <iostream>
 #include "Value.hpp"
 
+
 namespace ECE141 {
 
   //a "storage" file is comprised of fixed-sized blocks (defined below)
@@ -66,7 +67,21 @@ namespace ECE141 {
     BlockHeader   header;
     char          data[kPayloadSize];
   };
- 
+
+
+//  class BlockVisitor {
+//  public:
+//      BlockVisitor(Schema& curSchema, Filters& filters, vector<string>& properties, RowCollection& rowCollection) :
+//              schema(curSchema), filters(filters), properties(properties), rowCollection(rowCollection) {};
+//
+//      StatusResult operator()(Storage& storage, uint32_t blockNum, StorageBlock& block);
+//
+//  protected:
+//      Schema& schema;
+//      Filters& filters;
+//      vector<string>& properties;
+//      RowCollection& rowCollection;
+//  };
 }
 
 #endif /* StorageBlock_hpp */

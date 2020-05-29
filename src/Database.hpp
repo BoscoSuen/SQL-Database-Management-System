@@ -17,14 +17,17 @@
 #include "View.hpp"
 #include "Schema.hpp"
 #include "Row.hpp"
+#include "Index.hpp"
+#include "Filters.hpp"
 #include "FolderReader.hpp"
 
 using namespace std;
 
 namespace ECE141 {
   class Schema;
+//  class Filters;
   vector<string> split_str(string str,string pattern);
-
+  vector<string> split_str(string str,string pattern , int cut);
   class Database{
   public:
     static Database* getDBInstance();
@@ -58,14 +61,19 @@ namespace ECE141 {
     StatusResult      dropTable(const string &aName);
 
     StatusResult      insert(Row& aRow, string aName);
+    StatusResult      selectRow(Filters& filters, Schema& curSchema, RowCollection& rowCollection, vector<string>& properties, int limit);
+    StatusResult      updateRow(Schema& curSchema, KeyValues& aKeyValues, Row& aRow);
     StatusResult      deleteRow(string aTableName);
 
+    Index*            getIndexForTableField(string aTableName, string aFieldName);
 
+    StatusResult      showIndexes();
 
   protected:
     std::string     name;
     Storage         storage;
     unordered_map<string, int> schemas;
+    unordered_map<string, Index*> index_map;
     
   private:
     static  Database* activeDB;
