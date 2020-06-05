@@ -56,6 +56,14 @@ Schema::Schema(const Schema &aCopy) : name(aCopy.name),  changed(aCopy.changed),
     return StatusResult{Errors::noError};
   }
 
+  bool Schema::attrInSchema(string attrName) {
+    AttributeList attributeList = this->getAttributes();
+    for (auto it = attributeList.begin(); it != attributeList.end(); ++it) {
+      if (it->getName() == attrName) return true;
+    }
+    return false;
+  }
+
   StatusResult Schema::encodeKeyValues(StorageBlock& aBlock, KeyValues& data) {
     // get first pos after write the table name:
     int pos = 0;

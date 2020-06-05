@@ -50,7 +50,12 @@ namespace ECE141 {
 
     bool operator<(const ValueType& valueType) const;
 
-    Value value;
+    ValueType operator=(const ValueType& valueType);
+
+    bool operator==(const ValueType& valueType) const;
+
+
+      Value value;
     DataType type;
   };
 

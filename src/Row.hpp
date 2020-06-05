@@ -34,11 +34,15 @@ namespace ECE141 {
         KeyValues copyData() const {return data;}
         KeyValues& getData() {return data;}
 
+
+
         void setBlockNum(uint32_t blockNum);
 
         uint32_t getBlockNum();
 
         void insert(KeyValue pair) {data.insert(pair);}
+
+        void addKeyValue(string key, ValueType valueType) { data[key] = valueType; }
 
         virtual StatusResult  encode(std::ostringstream &aWriter) const;
 
@@ -47,10 +51,14 @@ namespace ECE141 {
         static Value getData(string str);
         static vector<string> split(string str,string pattern);
 
+        ValueType getDataFromKeyValues(string str);
+
     protected:
         KeyValues data;  //you're free to change this if you like...
         int32_t blockNum;
     };
+
+
 
     class RowCollection {
     public:
@@ -63,6 +71,12 @@ namespace ECE141 {
         RowCollection&  order(Schema& aSchema, string& orderBy);
 
         RowCollection&  remainLimitPart(int limit);
+
+        StatusResult    leftJoin(RowCollection rc1, RowCollection rc2, vector<string> selectList1, vector<string> selectList2, string attr1, string attr2);
+
+        StatusResult    rightJoin(RowCollection rc1, RowCollection rc2, vector<string> selectList1, vector<string> selectList2, string attr1, string attr2);
+
+        StatusResult    innerJoin(RowCollection rc1, RowCollection rc2, vector<string> selectList1, vector<string> selectList2, string attr1, string attr2);
 
 
     protected:

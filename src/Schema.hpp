@@ -66,6 +66,8 @@ namespace ECE141 {
     
     //friend class Database; //is this helpful?
 
+    bool                  attrInSchema(string attrName);
+
     StatusResult    encode(std::ostringstream &aWriter) const;
 
     StatusResult    encodeKeyValues(StorageBlock& aBlock, KeyValues& data);

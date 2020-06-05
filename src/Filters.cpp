@@ -88,6 +88,18 @@ namespace ECE141 {
     return before;
   }
 
+  bool Filters::matchIndex(ValueType index , std::string indexName) const {
+    if (expressions.size() >= 2) return true;
+    Expression* ex = expressions[0];
+    bool res = true;
+    if (ex->lhs.attrName.compare(indexName) == 0) {
+      KeyValues tmp;
+      tmp.insert(std::make_pair(indexName, index));
+      res = (*ex)(tmp);
+    }
+    return res;
+  }
+
   Filters& Filters::add(Expression *anExpression) {
     expressions.push_back(anExpression);
     return *this;

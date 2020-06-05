@@ -427,7 +427,7 @@ namespace ECE141 {
   StatusResult SelectRecordStatement::parse(Tokenizer& aTokenizer) {
     std::vector<Keywords> pattern = {Keywords::select_kw};
     if (!aTokenizer.keywordsMatch(pattern)) {aTokenizer.restart(); return StatusResult(syntaxError ,0);}
-    
+  
     // get properties
     StatusResult parseRes = parseProperties(aTokenizer);
     if (!parseRes) { aTokenizer.restart(); return parseRes; }
@@ -438,27 +438,83 @@ namespace ECE141 {
     // there is no string attached, return success
     aTokenizer.next();
     if (aTokenizer.more()) {
-      // parse where to expression
-      if (aTokenizer.more() && aTokenizer.current().keyword == Keywords::where_kw) {
-        parseRes = parseExpressions(aTokenizer);
-        if (!parseRes) { aTokenizer.restart(); return parseRes; }
-      }
-      
-      // parse order by
-      if (aTokenizer.more() && aTokenizer.current().keyword == Keywords::order_kw) {
-        parseRes = parseOrder(aTokenizer);
-        if (!parseRes) { aTokenizer.restart(); return parseRes; }
-      }
-      
-      // parse limit
-      if (aTokenizer.more() && aTokenizer.current().keyword == Keywords::limit_kw) {
-        parseRes = parseLimit(aTokenizer);
-        if (!parseRes) { aTokenizer.restart(); return parseRes; }
-      }
+      if (aTokenizer.current().keyword == Keywords::left_kw || aTokenizer.current().keyword == Keywords::right_kw || aTokenizer.current().keyword == Keywords::inner_kw)
+        return parseJoinCondition(aTokenizer);
+      else
+        return parseWhereCondition(aTokenizer);
     }
     return StatusResult();
   }
   
+  StatusResult SelectRecordStatement::parseJoinCondition(Tokenizer& aTokenizer) {
+    StatusResult parseRes = StatusResult(unknownCommand , 0);
+    // LEFT - RIGHT
+    if (aTokenizer.current().keyword == Keywords::left_kw) joinType = 0;
+    else if (aTokenizer.current().keyword == Keywords::right_kw) joinType = 1;
+    else joinType = 2;
+    hasJoin = true;
+    aTokenizer.next();
+    // JOIN
+    if (aTokenizer.current().keyword != Keywords::join_kw)
+      return parseRes;
+    aTokenizer.next();
+    
+    tableName2 = aTokenizer.current().data;
+    aTokenizer.next();
+    
+    if (!aTokenizer.more() || aTokenizer.current().keyword != Keywords::on_kw)
+      return parseRes;
+    aTokenizer.next();
+    
+    if (aTokenizer.remaining() >= 3) {
+      if (aTokenizer.current().data.compare(tableName) == 0){
+        aTokenizer.next();aTokenizer.next();
+        attr1 = aTokenizer.current().data;
+      } else {
+        aTokenizer.next();aTokenizer.next();
+        attr2 = aTokenizer.current().data;
+      }
+    }
+    aTokenizer.next();
+    
+    if (aTokenizer.more() && aTokenizer.current().op != Operators::equal_op)
+      return parseRes;
+    aTokenizer.next();
+    
+    if (aTokenizer.remaining() >= 3) {
+      if (aTokenizer.current().data.compare(tableName) == 0){
+        aTokenizer.next();aTokenizer.next();
+        attr1 = aTokenizer.current().data;
+      } else {
+        aTokenizer.next();aTokenizer.next();
+        attr2 = aTokenizer.current().data;
+      }
+    }
+    return StatusResult();
+  }
+
+  StatusResult SelectRecordStatement::parseWhereCondition(Tokenizer& aTokenizer){
+    StatusResult parseRes;
+    // parse where to expression
+    if (aTokenizer.more() && aTokenizer.current().keyword == Keywords::where_kw) {
+      parseRes = parseExpressions(aTokenizer);
+      if (!parseRes) { aTokenizer.restart(); return parseRes; }
+    }
+    
+    // parse order by
+    if (aTokenizer.more() && aTokenizer.current().keyword == Keywords::order_kw) {
+      parseRes = parseOrder(aTokenizer);
+      if (!parseRes) { aTokenizer.restart(); return parseRes; }
+    }
+    
+    // parse limit
+    if (aTokenizer.more() && aTokenizer.current().keyword == Keywords::limit_kw) {
+      parseRes = parseLimit(aTokenizer);
+      if (!parseRes) { aTokenizer.restart(); return parseRes; }
+    }
+    return parseRes;
+  }
+
   StatusResult SelectRecordStatement::parseProperties(Tokenizer& aTokenizer) {
     if (aTokenizer.current().type == TokenType::operators) {
       if (aTokenizer.current().data.compare("*") == 0)
@@ -529,27 +585,45 @@ namespace ECE141 {
 
   StatusResult SelectRecordStatement::run(std::ostream& aStream) const {
     Database* activeDB = Database::getDBInstance();
-    if (activeDB == nullptr)
-      return StatusResult(Errors::noDatabaseSpecified , 0);
+    if (activeDB == nullptr) return StatusResult(Errors::noDatabaseSpecified , 0);
     StatusResult queryNumberRes = activeDB -> getSchemaBlockNum(tableName);
     if (!queryNumberRes) return queryNumberRes;
     StorageBlock block;
     activeDB -> getStorage().readBlock(block, queryNumberRes.value);
-    Schema schema("");
-    Schema::decode(schema, block.data);
-    Validator* validator = new AttributeValidator(
-                new ExpressionDataValidator(nullptr , schema , expressions) , schema , properties);
-    StatusResult validRes = validator->validate();
-    if (!validRes) return validRes;
-    delete validator;
-    
-    Filters filters(expressions);
-    // properties = member expressions
-    // limit      = member limit
-    // orderBy    = member orderBy
-    // schemaName = member tableName
-    return processor->selectRow(tableName , filters , properties , orderBy , limit);
-//    return StatusResult();
+    Schema schema1("");
+    Schema::decode(schema1, block.data);
+    if (hasJoin){
+      StatusResult queryNumberRes = activeDB -> getSchemaBlockNum(tableName2);
+      if (!queryNumberRes) return queryNumberRes;
+      StorageBlock block;
+      activeDB -> getStorage().readBlock(block, queryNumberRes.value);
+      Schema schema2("");
+      Schema::decode(schema2, block.data);
+      
+      AttributeList attrList;
+      for (std::string& property : properties) {
+        Attribute cur = schema1.getAttribute(property);
+        if (cur.getType() != DataType::no_type) {attrList.push_back(cur); continue;}
+        cur = schema2.getAttribute(property);
+        if (cur.getType() != DataType::no_type) {attrList.push_back(cur); continue;}
+        return StatusResult(Errors::unknownAttribute , 0);
+      }
+//        return processor->join(tableName , tableName2 , attrList , attr1 , attr2 , joinType);
+        return StatusResult();
+    } else {
+      Validator* validator = new AttributeValidator(
+                  new ExpressionDataValidator(nullptr , schema1 , expressions) , schema1 , properties);
+      StatusResult validRes = validator->validate();
+      if (!validRes) return validRes;
+      delete validator;
+      
+      Filters filters(expressions);
+      // properties = member expressions
+      // limit      = member limit
+      // orderBy    = member orderBy
+      // schemaName = member tableName
+      return processor->selectRow(tableName , filters , properties , orderBy , limit);
+    }
   }
 
   // UPDATE users SET email='test@ucsd.edu' WHERE dept='CSE' AND name='anotherbar
@@ -772,4 +846,39 @@ namespace ECE141 {
     cout << " (" << timer.elapsed() << " ms.)" << endl;
     return selectResult;
   }
+
+  StatusResult RecordProcessor::join(string schema1, string schema2, AttributeList selectList, string attr1, string attr2, int joinStatus) {
+    Timer timer;
+    timer.start();
+    Database* activeDB = Database::getDBInstance();
+    Schema curSchema1 = activeDB->getSchema(schema1);
+    Schema curSchema2 = activeDB->getSchema(schema2);
+    RowCollection rc1, rc2;
+    vector<string> properties;
+    Filters filters;
+    activeDB->selectRow(filters, curSchema1, rc1, properties, -1);
+    activeDB->selectRow(filters, curSchema2, rc2, properties, -1);
+    RowCollection rc;
+    vector<string> leftList;
+    vector<string> rightList;
+    for (auto it = selectList.begin(); it != selectList.end(); ++it) {
+      if (curSchema1.attrInSchema(it->getName())) leftList.push_back(it->getName());
+      else rightList.push_back(it->getName());
+    }
+
+    StatusResult joinResult;
+    if (joinStatus == 0) joinResult = rc.leftJoin(rc1, rc2, leftList, rightList, attr1, attr2);
+    else if (joinStatus == 1) joinResult = rc.rightJoin(rc1, rc2, leftList, rightList, attr1, attr2);
+    // TODO: joinStatus == 2 rc.innerJoin(rc1, rc2, selectStringList, attr1, attr2)
+    else joinResult = StatusResult{Errors::joinTypeExpected};
+    timer.stop();
+
+    if (View* view = new SelectTableView(selectList, rc.getRows())) {
+      view->show(cout);
+      delete view;
+    }
+    cout << " (" << timer.elapsed() << " ms.)" << endl;
+    return joinResult;
+  }
+
 }

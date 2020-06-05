@@ -63,8 +63,10 @@ namespace ECE141 {
     
     size_t        getCount() const {return expressions.size();}
     bool          matches(KeyValues &aList) const;
+    bool          matchIndex(ValueType index , std::string indexName) const;
     Filters&      add(Expression *anExpression);
     Expressions   getExpressions() const {return expressions;}
+    
     
     friend class Tokenizer;
     

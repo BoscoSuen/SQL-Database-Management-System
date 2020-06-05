@@ -36,6 +36,12 @@ namespace ECE141 {
     StatusResult update(string& schemaName, KeyValues& aKeyValues, Filters& aFilters);
     StatusResult deleteRow(string aTableName);  // cannot use delete(), weird...
     StatusResult selectRow(string schemaName, Filters& filters, vector<string> properties, string orderBy, int limit);
+
+    // TODO: left join & right join:
+    // select AttributeList attrs from schema1 left join schema2 on schema1.attr1=schema2.attr2;
+    // joinStatus = 0 -> leftJoin; 1 -> rightJoin; 2 ->other function
+    StatusResult join(string schema1, string schema2, AttributeList selectList, string attr1, string attr2, int joinStatus);
+
 //  protected:
   };
 
@@ -105,6 +111,15 @@ namespace ECE141 {
     //                       x      (has limit, display the first x)
     mutable int              limit;
     
+    // rest for join
+    mutable std::string tableName2;
+    mutable std::string attr1;
+    mutable std::string attr2;
+    mutable int joinType; // 0 left 1 right 2 inner
+    mutable bool hasJoin;
+    
+    StatusResult parseJoinCondition(Tokenizer& aTokenizer);
+    StatusResult parseWhereCondition(Tokenizer& aTokenizer);
     StatusResult parseProperties(Tokenizer& aTokenizer);
     StatusResult parseExpressions(Tokenizer& aTokenizer);
     StatusResult parseLimit(Tokenizer& aTokenizer);

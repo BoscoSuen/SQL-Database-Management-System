@@ -302,6 +302,7 @@ namespace ECE141 {
       StatusResult selectResult;
       Index::IndexType indexPairs = curIndex->getIndex();
       for (auto pair : indexPairs) {
+        if (!filters.matchIndex(pair.first, curSchema.getPrimaryKeyName())) continue;
         uint32_t blockNum = pair.second;
         StorageBlock curBlock;
         if (selectResult = storage.readBlock(curBlock, blockNum)) {

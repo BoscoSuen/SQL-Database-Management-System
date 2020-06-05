@@ -90,6 +90,10 @@ namespace ECE141 {
       return res;
     }
 
+    ValueType Row::getDataFromKeyValues(string str) {
+      return data.at(str);
+    }
+
     StatusResult Row::decode(Row& row, std::string str) {
       // to be written
 //    Row aRow;   // default blockNum 0, do not need
@@ -138,5 +142,68 @@ namespace ECE141 {
         rowList.pop_back();
       }
       return *this;
+    }
+
+
+
+    StatusResult RowCollection::leftJoin(RowCollection rc1, RowCollection rc2, vector<string> selectList1, vector<string> selectList2, string attr1, string attr2) {
+      // Row: KeyValues<string, valueType> data, blockNum
+      std::map<ValueType, vector<Row*>> rightMap;
+      for (auto it = rc2.rowList.begin(); it != rc2.rowList.end(); ++it) {
+        ValueType valueType = (*it)->getDataFromKeyValues(attr2);
+        rightMap[valueType].push_back(*it);
+      }
+      for (auto it = rc1.rowList.begin(); it != rc1.rowList.end(); ++it) {
+        ValueType valueType = (*it)->getDataFromKeyValues(attr1);
+        // check if there is any match in table2
+        if (!rightMap.count(valueType)) {
+          Row* cur = new Row();
+          // add original val
+          for (string attr : selectList1) cur->addKeyValue(attr, (*it)->getDataFromKeyValues(attr));
+          for (string attr : selectList2) cur->addKeyValue(attr, ValueType{"NULL", DataType::varchar_type});
+          this->rowList.push_back(cur);
+        } else {
+          for (Row* rightRow : rightMap.at(valueType)) {
+            Row* cur = new Row();
+            for (string attr : selectList1) cur->addKeyValue(attr, (*it)->getDataFromKeyValues(attr));
+            for (string attr : selectList2) cur->addKeyValue(attr, rightRow->getDataFromKeyValues(attr));
+            this->rowList.push_back(cur);
+          }
+        }
+      }
+      return StatusResult{noError};
+    }
+
+
+    StatusResult RowCollection::rightJoin(RowCollection rc1, RowCollection rc2, vector<string> selectList1, vector<string> selectList2, string attr1, string attr2) {
+      std::map<ValueType, vector<Row*>> leftMap;
+      for (auto it = rc1.rowList.begin(); it != rc1.rowList.end(); ++it) {
+        ValueType valueType = (*it)->getDataFromKeyValues(attr2);
+        leftMap[valueType].push_back(*it);
+      }
+      for (auto it = rc2.rowList.begin(); it != rc2.rowList.end(); ++it) {
+        ValueType valueType = (*it)->getDataFromKeyValues(attr1);
+        // check if there is any match in table2
+        if (!leftMap.count(valueType)) {
+          Row* cur = new Row();
+          // add original val, table1 part is null
+          for (string attr : selectList1) cur->addKeyValue(attr, ValueType{"NULL", DataType::varchar_type});
+          for (string attr : selectList2) cur->addKeyValue(attr, (*it)->getDataFromKeyValues(attr));
+          this->rowList.push_back(cur);
+        } else {
+          for (Row* leftRow : leftMap.at(valueType)) {
+            Row* cur = new Row();
+            for (string attr : selectList1) cur->addKeyValue(attr, leftRow->getDataFromKeyValues(attr));
+            for (string attr : selectList2) cur->addKeyValue(attr, (*it)->getDataFromKeyValues(attr));
+            this->rowList.push_back(cur);
+          }
+        }
+      }
+      return StatusResult{noError};
+    }
+
+
+    StatusResult RowCollection::innerJoin(RowCollection rc1, RowCollection rc2, vector<string> selectList1, vector<string> selectList2, string attr1, string attr2) {
+      return StatusResult{noError};
     }
 }
