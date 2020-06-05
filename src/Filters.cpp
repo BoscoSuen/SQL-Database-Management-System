@@ -89,7 +89,7 @@ namespace ECE141 {
   }
 
   bool Filters::matchIndex(ValueType index , std::string indexName) const {
-    if (expressions.size() >= 2) return true;
+    if (expressions.size() >= 2 || expressions.size() == 0) return true;
     Expression* ex = expressions[0];
     bool res = true;
     if (ex->lhs.attrName.compare(indexName) == 0) {

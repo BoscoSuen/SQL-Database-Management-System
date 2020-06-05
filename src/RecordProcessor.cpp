@@ -608,8 +608,8 @@ namespace ECE141 {
         if (cur.getType() != DataType::no_type) {attrList.push_back(cur); continue;}
         return StatusResult(Errors::unknownAttribute , 0);
       }
-//        return processor->join(tableName , tableName2 , attrList , attr1 , attr2 , joinType);
-        return StatusResult();
+        return processor->join(tableName , tableName2 , attrList , attr1 , attr2 , joinType);
+//        return StatusResult();
     } else {
       Validator* validator = new AttributeValidator(
                   new ExpressionDataValidator(nullptr , schema1 , expressions) , schema1 , properties);

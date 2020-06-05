@@ -113,9 +113,9 @@ namespace ECE141 {
     }
 
     RowCollection::~RowCollection() {
-      for (auto row : rowList) {
-        delete row;
-      }
+//      for (auto row : rowList) {
+//        delete row;
+//      }
     }
 
     vector<Row*> RowCollection::getRows() {
