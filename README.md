@@ -1,6 +1,5 @@
 # SQL-Database-Management-System
 [![MIT License](https://img.shields.io/github/license/Yukinichi/tiktok-in-wechat)](https://github.com/BoscoSuen/SQL-Database-Management-System/blob/master/LICENSE)
-[![LinkedIn][linkedin-shield]][Zhiqiang-url]   
 
 It is a SQL database management system based on **C++ 17** and we have created the command parser, low-level storage and database system, and complete many basic SQL commands. More over, we also improved the database management system performance using **Index data blocks** to index some table fields indexing the data blocks, and also add **LRU cache** to improve the data block reading preformance.
 ![](./resources/dbimg1.png)
