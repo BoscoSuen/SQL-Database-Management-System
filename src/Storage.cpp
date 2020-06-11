@@ -20,7 +20,6 @@ namespace ECE141 {
       //WINDOWS USERS:  Use forward slash (/) not backslash (\) to separate paths.
       //                (Windows convert forward slashes for you)
       
-//    const char* thePath = "/Users/suen/Desktop/ECE141B/ece141-sp20-assignment8-zhiqiang_sun_hongxiang_jiang/tempdb";
       const char* thePath = std::getenv("DB_PATH");
       return thePath;
 //    return "/tmp";

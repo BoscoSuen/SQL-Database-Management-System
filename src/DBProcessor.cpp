@@ -261,6 +261,12 @@ namespace ECE141 {
     }
 
     StatusResult DBProcessor::showDatabases() const {
+      std::string path(StorageInfo::getDefaultStoragePath());
+      std::filesystem::path p(path + "/");
+      for (auto& file : std::filesystem::directory_iterator(p)) {
+        if (file.path().extension() == ".db")
+          std::cout << std::string(file.path().stem()) << std::endl;
+      }
       return StatusResult{noError};
     }
 }

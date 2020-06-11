@@ -1,5 +1,5 @@
-src/CMakeLists.txt
 src/cmake-build-*/
+src/tempdb
 .DS_Store
 */.DS_Store
 .idea/

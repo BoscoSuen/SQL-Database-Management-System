@@ -438,10 +438,12 @@ namespace ECE141 {
     // there is no string attached, return success
     aTokenizer.next();
     if (aTokenizer.more()) {
-      if (aTokenizer.current().keyword == Keywords::left_kw || aTokenizer.current().keyword == Keywords::right_kw || aTokenizer.current().keyword == Keywords::inner_kw)
-        return parseJoinCondition(aTokenizer);
-      else
+      if (aTokenizer.current().keyword == Keywords::where_kw ||
+          aTokenizer.current().keyword == Keywords::order_kw ||
+          aTokenizer.current().keyword == Keywords::limit_kw)
         return parseWhereCondition(aTokenizer);
+      else
+        return parseJoinCondition(aTokenizer);
     }
     return StatusResult();
   }
@@ -451,12 +453,15 @@ namespace ECE141 {
     // LEFT - RIGHT
     if (aTokenizer.current().keyword == Keywords::left_kw) joinType = 0;
     else if (aTokenizer.current().keyword == Keywords::right_kw) joinType = 1;
-    else joinType = 2;
-    hasJoin = true;
-    aTokenizer.next();
+    else if (aTokenizer.current().keyword == Keywords::inner_kw) joinType = 2;
+    else if (aTokenizer.current().keyword == Keywords::join_kw) joinType = -1;
+    else return StatusResult(unknownCommand , 0);
+    
     // JOIN
+    if (aTokenizer.current().keyword != Keywords::join_kw) aTokenizer.next();
     if (aTokenizer.current().keyword != Keywords::join_kw)
       return parseRes;
+    hasJoin = true;
     aTokenizer.next();
     
     tableName2 = aTokenizer.current().data;
@@ -584,6 +589,7 @@ namespace ECE141 {
   }
 
   StatusResult SelectRecordStatement::run(std::ostream& aStream) const {
+    if (hasJoin && joinType == -1) return StatusResult(joinTypeExpected , 0);
     Database* activeDB = Database::getDBInstance();
     if (activeDB == nullptr) return StatusResult(Errors::noDatabaseSpecified , 0);
     StatusResult queryNumberRes = activeDB -> getSchemaBlockNum(tableName);
@@ -601,14 +607,23 @@ namespace ECE141 {
       Schema::decode(schema2, block.data);
       
       AttributeList attrList;
-      for (std::string& property : properties) {
-        Attribute cur = schema1.getAttribute(property);
-        if (cur.getType() != DataType::no_type) {attrList.push_back(cur); continue;}
-        cur = schema2.getAttribute(property);
-        if (cur.getType() != DataType::no_type) {attrList.push_back(cur); continue;}
-        return StatusResult(Errors::unknownAttribute , 0);
+      if (properties.size() == 0) {
+        bool sameName = attr1.compare(attr2) == 0 ? true : false;
+        for (Attribute att : schema1.getAttributes()) attrList.push_back(att);
+        for (Attribute att : schema2.getAttributes()){
+          if (!sameName || att.getName().compare(attr2) != 0) attrList.push_back(att);
+        }
+          
+      } else {
+        for (std::string& property : properties) {
+          Attribute cur = schema1.getAttribute(property);
+          if (cur.getType() != DataType::no_type) {attrList.push_back(cur); continue;}
+          cur = schema2.getAttribute(property);
+          if (cur.getType() != DataType::no_type) {attrList.push_back(cur); continue;}
+          return StatusResult(Errors::unknownAttribute , 0);
+        }
       }
-        return processor->join(tableName , tableName2 , attrList , attr1 , attr2 , joinType);
+      return processor->join(tableName , tableName2 , attrList , attr1 , attr2 , joinType);
 //        return StatusResult();
     } else {
       Validator* validator = new AttributeValidator(
